@@ -35,8 +35,8 @@
 
 
 
-define("srand_num_max",1000);
-define("srand_len_max",1000);
+define("srand_num_max",100);
+define("srand_len_max",20);
 
 define("srand_min_max",65534);
 define("srand_max_max",65535);
@@ -233,7 +233,7 @@ if ($type == "strings") {
       }
       
    }
-   echo "done\n";
+   echo "\n";
    die();
 }
 
