@@ -13,6 +13,14 @@
  * 
  * License / Distribution:
  *    'FreeBSD License' (see LICENSE.txt)
+ *
+ * Project Homepage
+ *    http://katmore.com/sft/randapi
+ *
+ * Social:
+ *    randapi@katmore.com
+ *    twitter.com/katmore 
+ *    github.com/katmore/randapi
  * 
  * Usage:
  * 
@@ -24,21 +32,24 @@
  * 
  * 
  */
-function getRandom($min, $max) {
-   $fp = fopen('/dev/urandom','rb');
-   $seed = fread($fp,32);
-   $diff = $max-$min;
-   $bytes = ceil($diff/256);
-   $bits = fread($fp,$bytes);
-   fclose($fp);
-   $int = ($seed*256+ord($bits[strlen($bits)-1])) % ($max-$min+1);
-   return $int;
-}
+
+
 
 define("srand_num_max",1000);
 define("srand_len_max",1000);
-define("srand_min_max",999999);
-define("srand_max_max",999999);
+
+define("srand_min_max",65534);
+define("srand_max_max",65535);
+
+function getRandom( $min, $max) {
+   $fp = fopen('/dev/urandom','rb');
+   //taken from magneto crypt_random function
+   extract(unpack('Nrandom', fread($fp, 4)));
+   fclose($fp);
+   
+   return abs($random) % (($max-$min)+1) + $min;
+}
+
 define("srand_col_max",100);
 $num = 8;
 $min = 0;
@@ -159,7 +170,48 @@ if ($type == "bytes") {
 
 if ($type == "strings") {
    header("Content-Type: text/plain"); 
-   $allvalid = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+   ////upperalpha=on&loweralpha=on&digits=on
+   
+   
+   $loweralpha = "abcdefghijklmnopqrstuvwxyz";
+   $upperalpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+   $digits = "0123456789";
+   $allvalid = "";
+   $use_upperalpha = true;
+   $use_loweralpha = true;
+   $use_digits = true;
+   
+   if (isset($_GET["upperalpha"]))
+   if (($_GET["upperalpha"]=="off"))
+      $use_upperalpha = false;
+   
+   if (isset($_GET["loweralpha"]))
+   if ($_GET["loweralpha"]=="off")
+      $use_loweralpha = false;
+   
+   if (isset($_GET["digits"]))
+   if ($_GET["digits"]=="off")
+      $use_digits = false;
+   
+   if ($use_upperalpha)
+      $allvalid .= $upperalpha;
+   
+   if ($use_loweralpha)
+      $allvalid .= $loweralpha;
+   
+   if ($use_digits)
+      $allvalid .= $digits;
+   
+   if (isset($_GET["charpool"])) {
+      $allvalid = filter_var($_GET["charpool"],FILTER_UNSAFE_RAW,FILTER_FLAG_STRIP_LOW+FILTER_FLAG_STRIP_HIGH);
+   }
+   
+   if (strlen($allvalid)<2) {
+      header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
+      echo "error: not enough valid characters";
+      die();
+   }
+   
    $validmax = strlen($allvalid) - 1;
    //echo "validmax=$validmax\n";
    $c = 0;
@@ -183,10 +235,17 @@ if ($type == "strings") {
 
 //default to 'integers'
 header("Content-Type: text/plain"); 
+if ( 
+      (($min <0) || ($max <0)) || 
+      (($max - $min) < 1)
+   ) {
+      header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
+      echo "error: bad min-max";
+      die();
+   }
 $c = 0;
 for ($i = 0;$i<$num;$i++) {
-
-   echo getRandom($min, $max);
+   echo getRandom($min,$max);
    $c++;
    if ($c==$col) {
       echo "\n";
