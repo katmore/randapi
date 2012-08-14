@@ -41,6 +41,8 @@ define("srand_len_max",1000);
 define("srand_min_max",65534);
 define("srand_max_max",65535);
 
+define("srand_col_max",100);
+
 function getRandom( $min, $max) {
    $fp = fopen('/dev/urandom','rb');
    //taken from magneto crypt_random function
@@ -50,7 +52,7 @@ function getRandom( $min, $max) {
    return abs($random) % (($max-$min)+1) + $min;
 }
 
-define("srand_col_max",100);
+
 $num = 8;
 $min = 0;
 $max = 256;
@@ -64,35 +66,35 @@ $disposition = "inline";
 
 if (isset($_GET["col"])) {
    $coleval = filter_var($_GET["col"], FILTER_SANITIZE_NUMBER_INT);
-   if ( ($coleval > 0) && ($coleval < srand_col_max) ) {
+   if ( ($coleval > 0) && ($coleval <= srand_col_max) ) {
       $col = $coleval;
    }
 }
 
 if (isset($_GET["len"])) {
    $leneval = filter_var($_GET["len"], FILTER_SANITIZE_NUMBER_INT);
-   if ( ($leneval > 0) && ($leneval < srand_len_max) ) {
+   if ( ($leneval > 0) && ($leneval <= srand_len_max) ) {
       $len = $leneval;
    }
 }
 
 if (isset($_GET["num"])) {
    $numeval = filter_var($_GET["num"], FILTER_SANITIZE_NUMBER_INT);
-   if ( ($numeval > 0) && ($numeval < srand_num_max) ) {
+   if ( ($numeval > 0) && ($numeval <= srand_num_max) ) {
       $num = $numeval;
    }
 }
 
 if (isset($_GET["min"])) {
    $mineval = filter_var($_GET["min"], FILTER_SANITIZE_NUMBER_INT);
-   if ( ($mineval > 0) && ($mineval < srand_min_max) ) {
+   if ( ($mineval > 0) && ($mineval <= srand_min_max) ) {
       $min = $mineval;
    }
 }
 
 if (isset($_GET["max"])) {
    $maxeval = filter_var($_GET["max"], FILTER_SANITIZE_NUMBER_INT);
-   if ( ($maxeval > 0) && ($maxeval < srand_max_max) ) {
+   if ( ($maxeval > 0) && ($maxeval <= srand_max_max) ) {
       $max = $maxeval;
    }
 }
@@ -112,6 +114,9 @@ if (isset($_GET["what"])) {
    }
    if ($_GET["what"] == "bytes") {
       $type = "bytes";
+   }
+   if ($_GET["what"] == "integers") {
+      $type = "integers";
    }
 }
 
@@ -228,7 +233,7 @@ if ($type == "strings") {
       }
       
    }
-   echo "\n";
+   echo "done\n";
    die();
 }
 
