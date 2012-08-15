@@ -1,6 +1,9 @@
 RandAPI is a RESTful web service that generates random numbers strings bytes.
 It is free software.
 
+License:
+  2-clause "Simplified BSD License" or "FreeBSD License"; see LICENSE.txt
+
 Project Homepage
    * http://katmore.com/sft/randapi
    
