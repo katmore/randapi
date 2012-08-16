@@ -45,7 +45,7 @@ define("srand_col_max",100);
 
 define("srand_unique_try_time",30);
 
-define("srand_allow_unqiue",true);
+define("srand_allow_unqiue",false);
 
 define("srand_default_num",8);
 
@@ -181,7 +181,7 @@ if (isset($_GET["unique"])) {
    if (($_GET["unique"] == "on") || ($_GET["unique"] == "true") || ($_GET["unique"] == true)) {
       if (!srand_allow_unqiue) {
          header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
-         echo "error: unique feature not allowed";
+         echo "error: unique not allowed";
          die();
       }
       $unique = true;
