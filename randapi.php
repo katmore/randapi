@@ -204,7 +204,7 @@ if ($type == "bytes") {
     } else {
        header("Content-Type: text/plain"); 
     }
-    if ($encode == "base64") {
+    if ($encode == "hex") {
        echo bin2hex($bytes);
     } else
     if ($encode == "base64") {
