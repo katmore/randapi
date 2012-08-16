@@ -177,8 +177,13 @@ if (isset($_GET["disposition"])) {
 
 
 if (isset($_GET["unique"])) {
-   
+
    if (($_GET["unique"] == "on") || ($_GET["unique"] == "true") || ($_GET["unique"] == true)) {
+      if (!srand_allow_unqiue) {
+         header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
+         echo "error: unique feature not allowed";
+         die();
+      }
       $unique = true;
    }
    
