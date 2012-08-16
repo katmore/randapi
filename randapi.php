@@ -36,14 +36,40 @@
 
 
 define("srand_num_max",100);
-define("srand_len_max",20);
+define("srand_len_max",100);
 
 define("srand_min_max",65534);
 define("srand_max_max",65535);
 
 define("srand_col_max",100);
 
-function getRandom( $min, $max) {
+define("srand_unique_try_time",30);
+
+define("srand_allow_unqiue",true);
+
+define("srand_default_num",8);
+
+define("srand_default_min",0);
+
+define("srand_default_max",999);
+
+define("srand_default_col",16);
+
+define("srand_default_base",10);
+
+define("srand_default_len",8);
+
+define("srand_default_format","plain");
+
+define("srand_default_encode","none");
+
+define("srand_default_type","none");
+
+define("srand_default_disposition","inline");
+
+define("srand_default_unique",false);
+
+function getRandom($min, $max) {
    $fp = fopen('/dev/urandom','rb');
    //taken from magneto crypt_random function
    extract(unpack('Nrandom', fread($fp, 4)));
@@ -52,17 +78,17 @@ function getRandom( $min, $max) {
    return abs($random) % (($max-$min)+1) + $min;
 }
 
-
-$num = 8;
-$min = 0;
-$max = 256;
-$col = 16;
-$base = 10;
-$len = 8;
-$format = "plain";
-$encode = "none";
-$type = "integers";
-$disposition = "inline";
+$num = srand_default_num;
+$min = srand_default_min;
+$max = srand_default_max;
+$col = srand_default_col;
+$base = srand_default_base;
+$len = srand_default_len;
+$format = srand_default_format;
+$encode = srand_default_encode;
+$type = srand_default_type;
+$disposition = srand_default_disposition;
+$unique = srand_default_unique;
 
 if (isset($_GET["col"])) {
    $coleval = filter_var($_GET["col"], FILTER_SANITIZE_NUMBER_INT);
@@ -121,7 +147,7 @@ if (isset($_GET["what"])) {
 }
 
 if ($type == "bytes") {
-   $encode = "base64";
+   $encode = "hex";
 }
 
 if (isset($_GET["encode"])) {
@@ -130,7 +156,10 @@ if (isset($_GET["encode"])) {
    } else
    if ($_GET["encode"] == "none") {
       $encode = "none";
-   } 
+   } else
+   if ($_GET["encode"] == "hex") {
+      $encode = "hex";
+   }
 }
 
 if (($type == "bytes") && ($encode == "none")){
@@ -145,6 +174,16 @@ if (isset($_GET["disposition"])) {
       $disposition = "attachment";
    } 
 }
+
+
+if (isset($_GET["unique"])) {
+   
+   if (($_GET["unique"] == "on") || ($_GET["unique"] == "true") || ($_GET["unique"] == true)) {
+      $unique = true;
+   }
+   
+}
+
 
 if ($type == "bytes") {
    
@@ -162,6 +201,9 @@ if ($type == "bytes") {
        header("Content-Type: text/plain"); 
     }
     if ($encode == "base64") {
+       echo bin2hex($bytes);
+    } else
+    if ($encode == "base64") {
       
       echo base64_encode($bytes);
       
@@ -174,14 +216,7 @@ if ($type == "bytes") {
 }
 
 if ($type == "strings") {
-   header("Content-Type: text/plain"); 
-   ////upperalpha=on&loweralpha=on&digits=on
    
-   
-   $loweralpha = "abcdefghijklmnopqrstuvwxyz";
-   $upperalpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-   $digits = "0123456789";
-   $allvalid = "";
    $use_upperalpha = true;
    $use_loweralpha = true;
    $use_digits = true;
@@ -193,10 +228,14 @@ if ($type == "strings") {
    if (isset($_GET["loweralpha"]))
    if ($_GET["loweralpha"]=="off")
       $use_loweralpha = false;
-   
    if (isset($_GET["digits"]))
    if ($_GET["digits"]=="off")
       $use_digits = false;
+   
+   $loweralpha = "abcdefghijklmnopqrstuvwxyz";
+   $upperalpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+   $digits = "0123456789";
+   $allvalid = "";
    
    if ($use_upperalpha)
       $allvalid .= $upperalpha;
@@ -215,6 +254,63 @@ if ($type == "strings") {
       header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
       echo "error: not enough valid characters";
       die();
+   }
+   $allvalid = str_split($allvalid);
+}
+
+if (($type == "integers") && ($unique == true)) {
+
+   for($i=$min;$i<$max;$i++) {
+      $allvalid[] = $i;
+   }
+   
+}
+
+if ($type == "strings") {
+
+   header("Content-Type: text/plain"); 
+
+   if ($unique) {
+
+      if (count($allvalid)<$len) {
+         header($_SERVER['SERVER_PROTOCOL'] . ' 500 Internal Server Error', true, 500);
+         echo "error: len shorter than char pool for string";
+         die();
+      }
+      
+      
+      $validmax = count($allvalid) - 1;
+      //echo "validmax=$validmax\n";
+      $c = 0;
+      for ($i=0;$i<$num;$i++) {
+         for ($l=0;$l<$len;$l++) {
+            $charidx = getRandom(0, $validmax);
+            $char = $allvalid[$charidx];
+            echo $char;
+            //remove $charidx from $allvalid
+            $newvalid = array();
+            foreach($allvalid as $validchar) {
+               if ($validchar != $char) {
+                  //echo "yes\n";
+                  $newvalid[] = $validchar;
+               }
+            }
+            $allvalid = $newvalid;
+            //recalculate validmax
+            $validmax = count($allvalid) - 1;
+         }
+         $c++;
+         if ($c==$col) {
+            echo "\n";
+            $c=0;
+         } else {
+            echo "\t";
+         }
+         
+      }
+      echo "\n";
+      die();
+      
    }
    
    $validmax = strlen($allvalid) - 1;
@@ -238,8 +334,13 @@ if ($type == "strings") {
 }
 
 
+
 //default to 'integers'
-header("Content-Type: text/plain"); 
+header("Content-Type: text/plain");
+
+
+
+
 if ( 
       (($min <0) || ($max <0)) || 
       (($max - $min) < 1)
@@ -248,6 +349,10 @@ if (
       echo "error: bad min-max";
       die();
    }
+   
+
+
+   
 $c = 0;
 for ($i = 0;$i<$num;$i++) {
    echo getRandom($min,$max);
