@@ -37,7 +37,7 @@
 
 define("srand_num_max",100);
 define("srand_len_max",100);
-define("srand_num_max_for_bytes",1024);
+define("srand_num_max_for_bytes",10240);
 
 define("srand_min_max",65534);
 define("srand_max_max",65535);
