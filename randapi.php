@@ -82,7 +82,6 @@ $num = srand_default_num;
 $min = srand_default_min;
 $max = srand_default_max;
 $col = srand_default_col;
-$base = srand_default_base;
 $len = srand_default_len;
 $format = srand_default_format;
 $encode = srand_default_encode;
