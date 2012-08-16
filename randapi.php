@@ -37,6 +37,7 @@
 
 define("srand_num_max",100);
 define("srand_len_max",100);
+define("srand_num_max_for_bytes",1024);
 
 define("srand_min_max",65534);
 define("srand_max_max",65535);
@@ -131,6 +132,12 @@ if (isset($_GET["strings"])) {
 }
 if (isset($_GET["bytes"])) {
    $type = "bytes";
+if (isset($_GET["num"])) {
+   $numeval = filter_var($_GET["num"], FILTER_SANITIZE_NUMBER_INT);
+   if ( ($numeval > 0) && ($numeval <= srand_num_max_for_bytes) ) {
+      $num = $numeval;
+   }
+}
 }
 
 if (isset($_GET["what"])) {
@@ -317,7 +324,7 @@ if ($type == "strings") {
       
    }
    
-   $validmax = strlen($allvalid) - 1;
+   $validmax = count($allvalid) - 1;
    //echo "validmax=$validmax\n";
    $c = 0;
    for ($i=0;$i<$num;$i++) {
