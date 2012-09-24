@@ -1,4 +1,4 @@
-RandAPI is a RESTful web service that generates random numbers strings bytes.
+RandAPI is a RESTful web service that generates random integers, strings, or bytes.
 It is free software.
 
 License:
